@@ -1,0 +1,70 @@
+<head>
+    <title>Family Tree</title>
+</head>
+<body>
+<form id="addPerson">
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" name="name"><br>
+    <label for="birth">Tanggal Lahir:</label><br>
+    <input type="text" id="birth" name="birth"><br>
+    <label for="father">Ayah:</label><br>
+    <select id="father" name="father">
+    <option selected disabled>Pilih Ayah</option>
+        {{ range .ayah }}
+        <option value={{ .ID }}>{{ .Name }}</option>
+        {{ end }}
+    </select><br>
+    <label for="mother">Ibu:</label><br>
+    <select id="mother" name="mother">
+    <option selected disabled>Pilih Ibu</option>
+        {{ range .ibu }}
+        <option value={{ .ID }}>{{ .Name }}</option>
+        {{ end }}
+    </select><br>
+    <label for="gender">Jenis Kelamin:</label><br>
+    <select id="gender" name="gender">
+        <option selected disabled>Pilih Jenis Kelamin</option>
+        <option value="F">Perempuan</option>
+        <option value="M">Laki-Laki</option>
+    </select><br>
+    <input type="submit" value="Submit">
+</form>
+
+<script>
+document.getElementById('addPerson').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var formData = new FormData(this);
+    var jsonData = {};
+
+    for (var [key, value] of formData.entries()) {
+        if (key === 'father' || key === 'mother') {
+            value = parseInt(value, 10);
+        }
+        jsonData[key] = value;
+    }
+
+    fetch('/api/v1/tree/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jsonData),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data);
+        // Redirect to /api/v1/tree
+        window.location.href = "/api/v1/tree";
+    })
+    .catch((error) => {
+    console.error('Error:', error);
+    });
+});
+</script>
+</body>

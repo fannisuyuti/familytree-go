@@ -1,0 +1,76 @@
+<head>
+    <title>Family Tree</title>
+</head>
+<body>
+<form id="addPerson">
+    <input type="hidden" id="id" name="id" value={{ .personId }}><br>
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" name="name" value={{ .personName }}><br>
+    <label for="birth">Tanggal Lahir:</label><br>
+    <input type="text" id="birth" name="birth" value={{ .personBirth }}><br>
+    <label for="father">Ayah:</label><br>
+    <select id="father" name="father">
+        {{ with $.personFather }}
+        {{ else }}
+            <option selected disabled>Pilih Ayah</option>
+        {{ end }}
+        {{ range .ayah }}
+        <option value={{ .ID }} {{ if eq $.personFather .ID }}selected{{ end }}>{{ .Name }}</option>
+        {{ end }}
+    </select><br>
+    <label for="mother">Ibu:</label><br>
+    <select id="mother" name="mother">
+        {{ with $.personMother }}
+        {{ else }}
+            <option selected disabled>Pilih Ibu</option>
+        {{ end }}
+        {{ range .ibu }}
+        <option value={{ .ID }} {{ if eq $.personMother .ID }}selected{{ end }}>{{ .Name }}</option>
+        {{ end }}
+    </select><br>
+    <label for="gender">Gender:</label><br>
+    <select id="gender" name="gender">
+        <option value="F"  {{ if eq .personGender "F" }}selected{{ end }}>Perempuan</option>
+        <option value="M"  {{ if eq .personGender "M" }}selected{{ end }}>Laki-Laki</option>
+    </select><br>
+    <input type="submit" value="Submit">
+</form>
+
+<script>
+document.getElementById('addPerson').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var formData = new FormData(this);
+    var jsonData = {};
+
+    for (var [key, value] of formData.entries()) {
+        if (key === 'father' || key === 'mother' || key === 'id') {
+            value = parseInt(value, 10);
+        }
+        jsonData[key] = value;
+    }
+
+    fetch('/api/v1/tree/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jsonData),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data);
+        // Redirect to /api/v1/tree
+        window.location.href = "/api/v1/tree";
+    })
+    .catch((error) => {
+    console.error('Error:', error);
+    });
+});
+</script>
+</body>
